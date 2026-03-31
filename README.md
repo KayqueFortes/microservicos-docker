@@ -1,48 +1,101 @@
-📌 Sistema de Tarefas com Docker
+# 📌 Sistema de Tarefas com Docker
 
-Este projeto consiste no desenvolvimento de um sistema de gerenciamento de tarefas utilizando arquitetura de microserviços com Docker.
+Projeto de um sistema de gerenciamento de tarefas desenvolvido com arquitetura de microserviços utilizando Docker.
 
-🚀 Tecnologias utilizadas
-HTML, CSS e JavaScript (Front-end)
-PHP (API)
-MySQL (Banco de dados)
-Docker e Docker Compose
-Nginx (Servidor web)
-🧠 Arquitetura do sistema
+---
 
-O sistema é dividido em três serviços principais:
+## 🚀 Tecnologias
 
-Web (Nginx): responsável pela interface do usuário
-API (PHP): responsável pela lógica e comunicação com o banco
-Banco de Dados (MySQL): responsável pela persistência dos dados
-⚙️ Funcionalidades
-Adicionar tarefas
-Listar tarefas por data
-Marcar tarefas como concluídas
-Excluir tarefas com confirmação
-Mini calendário para navegação por dias
-🐳 Como executar o projeto
-1. Clonar o repositório
+- HTML, CSS e JavaScript  
+- PHP  
+- MySQL  
+- Docker e Docker Compose  
+- Nginx  
+
+---
+
+## 🧠 Como funciona
+
+O sistema é dividido em três partes:
+
+- **Web:** responsável pela interface do usuário  
+- **API:** responsável pela lógica do sistema e comunicação com o banco  
+- **Banco de Dados:** responsável pela persistência das tarefas  
+
+A comunicação acontece da seguinte forma:
+
+1. O usuário interage com a interface (Front-end)
+2. O JavaScript envia requisições para a API
+3. A API processa os dados e acessa o banco
+4. O banco retorna as informações
+5. A API responde em JSON para o front-end
+
+---
+
+## ⚙️ Funcionalidades
+
+- Adicionar tarefas  
+- Listar tarefas por data  
+- Marcar tarefas como concluídas  
+- Excluir tarefas com confirmação  
+- Seleção de data (mini calendário)  
+
+---
+
+## 🐳 Como executar o projeto
+
+### 1. Clonar o repositório
+
+```bash
 git clone https://github.com/KayqueFortes/microservicos-docker.git
 cd microservicos-docker
-2. Subir os containers
+```
+
+---
+
+### 2. Subir os containers
+
+```bash
 docker compose up --build
-3. Acessar o sistema
+```
+
+---
+
+### 3. Acessar o sistema
 
 Abra no navegador:
 
+```
 http://localhost:8080
-🗄️ Banco de dados
+```
 
-O banco de dados é criado automaticamente ao iniciar o container MySQL.
+---
 
-A tabela principal:
+## 🗄️ Banco de Dados
 
-tarefas (id, titulo, descricao, data_tarefa, status)
-🔁 Workflow (GitHub Actions)
+O banco de dados é criado automaticamente ao subir o container.
 
-O projeto utiliza um workflow simples para verificar o build dos containers automaticamente a cada push na branch main.
+Tabela principal:
 
-👨‍💻 Autor
+```
+tarefas
+```
+
+Campos:
+
+- id  
+- titulo  
+- descricao  
+- data_tarefa  
+- status  
+
+
+## 🔁 Workflow (GitHub Actions)
+
+O projeto utiliza um workflow simples para validar o build dos containers automaticamente a cada push na branch `main`.
+
+---
+
+## 👨‍💻 Autor
 
 Desenvolvido por Kayque Fortes.
