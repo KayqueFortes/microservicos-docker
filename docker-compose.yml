@@ -1,0 +1,57 @@
+services:
+  web:
+    build: ./web
+    container_name: servidor_web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  api:
+    build: ./api
+    container_name: servico_api
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: banco_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tarefas_db
+      MYSQL_USER: usuario
+      MYSQL_PASSWORD: senha123
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge
+
+      

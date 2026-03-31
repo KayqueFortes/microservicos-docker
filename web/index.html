@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Tarefas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .data-box {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .data-box label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .lista-titulo {
+      margin-top: 25px;
+      margin-bottom: 10px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .tarefa {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 12px;
+      background: #fafafa;
+    }
+
+    .tarefa.concluida {
+      background: #e8f5e9;
+      border-color: #81c784;
+    }
+
+    .tarefa h3 {
+      margin: 0 0 8px 0;
+    }
+
+    .tarefa p {
+      margin: 0 0 8px 0;
+    }
+
+    .status {
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .acoes {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .acoes button {
+      flex: 1;
+      min-width: 140px;
+      margin-bottom: 0;
+    }
+
+    .btn-concluir {
+      background: #28a745;
+    }
+
+    .btn-concluir:hover {
+      background: #1f7d34;
+    }
+
+    .btn-excluir {
+      background: #dc3545;
+    }
+
+    .btn-excluir:hover {
+      background: #a71d2a;
+    }
+
+    .vazio {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .info-data {
+      font-size: 15px;
+      color: #333;
+      margin-top: -6px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 18px;
+      }
+
+      .acoes {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sistema de Tarefas</h1>
+
+    <div class="data-box">
+      <label for="dataSelecionada">Selecionar dia</label>
+      <input type="date" id="dataSelecionada" onchange="carregarTarefas()">
+      <div class="info-data" id="textoData"></div>
+    </div>
+
+    <input type="text" id="titulo" placeholder="Título da tarefa">
+    <textarea id="descricao" placeholder="Descrição da tarefa"></textarea>
+    <button onclick="adicionarTarefa()">Adicionar Tarefa</button>
+
+    <div class="lista-titulo">Tarefas do dia</div>
+    <div id="listaTarefas"></div>
+  </div>
+
+  <script>
+  const API_URL = 'http://localhost:8000';
+
+  function formatarDataBR(dataISO) {
+    const [ano, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  function definirDataAtual() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const dataAtual = `${ano}-${mes}-${dia}`;
+
+    document.getElementById('dataSelecionada').value = dataAtual;
+    atualizarTextoData();
+  }
+
+  function atualizarTextoData() {
+    const data = document.getElementById('dataSelecionada').value;
+    document.getElementById('textoData').innerText = `Visualizando tarefas de: ${formatarDataBR(data)}`;
+  }
+
+  async function carregarTarefas() {
+    const data = document.getElementById('dataSelecionada').value;
+    atualizarTextoData();
+
+    const resposta = await fetch(`${API_URL}/?data=${data}`);
+    const tarefas = await resposta.json();
+
+    const lista = document.getElementById('listaTarefas');
+    lista.innerHTML = '';
+
+    if (!tarefas.length) {
+      lista.innerHTML = `<div class="vazio">Nenhuma tarefa cadastrada para este dia.</div>`;
+      return;
+    }
+
+    tarefas.forEach(tarefa => {
+      const div = document.createElement('div');
+      div.className = 'tarefa' + (tarefa.status === 'concluida' ? ' concluida' : '');
+
+      div.innerHTML = `
+        <h3>${tarefa.titulo}</h3>
+        <p>${tarefa.descricao}</p>
+        <div class="status">Status: ${tarefa.status}</div>
+        <div class="status">Data: ${formatarDataBR(tarefa.data_tarefa)}</div>
+        <div class="acoes">
+          ${tarefa.status !== 'concluida'
+            ? `<button class="btn-concluir" onclick="concluirTarefa(${tarefa.id})">Concluir</button>`
+            : ''
+          }
+          <button class="btn-excluir" onclick="excluirTarefa(${tarefa.id})">Excluir</button>
+        </div>
+      `;
+
+      lista.appendChild(div);
+    });
+  }
+
+  async function adicionarTarefa() {
+    const titulo = document.getElementById('titulo').value.trim();
+    const descricao = document.getElementById('descricao').value.trim();
+    const data_tarefa = document.getElementById('dataSelecionada').value;
+
+    if (!titulo || !descricao || !data_tarefa) {
+      alert('Preencha o título, a descrição e selecione a data.');
+      return;
+    }
+
+    const resposta = await fetch(`${API_URL}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, descricao, data_tarefa })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok) {
+      alert(resultado.erro || 'Erro ao cadastrar tarefa.');
+      return;
+    }
+
+    document.getElementById('titulo').value = '';
+    document.getElementById('descricao').value = '';
+    await carregarTarefas();
+  }
+
+  async function concluirTarefa(id) {
+    const resposta = await fetch(`${API_URL}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok) {
+      alert(resultado.erro || 'Erro ao concluir tarefa.');
+      return;
+    }
+
+    await carregarTarefas();
+  }
+
+  async function excluirTarefa(id) {
+    const confirmar = confirm('Tem certeza que deseja excluir esta tarefa?');
+
+    if (!confirmar) return;
+
+    const resposta = await fetch(`${API_URL}/`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok) {
+      alert(resultado.erro || 'Erro ao excluir tarefa.');
+      return;
+    }
+
+    await carregarTarefas();
+  }
+
+  definirDataAtual();
+  carregarTarefas();
+</script>
+</body>
+</html>
